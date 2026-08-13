@@ -44,7 +44,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                 mitre="T1566",
                 # Urgency copy alone is just as common in aggressive marketing
                 # spam as in phishing. It's real signal for "worth a look" but
-                # shouldn't by itself push the phishing/spam split — that job
+                # shouldn't by itself push the phishing/spam split - that job
                 # belongs to findings tied to an actual credential/malware/fraud
                 # mechanism (URL, attachment, BEC keywords, impersonation).
                 phishing_signal=False,
@@ -58,7 +58,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                 category=Category.CONTENT,
                 severity=Severity.LOW,
                 title="Generic, non-personalized greeting",
-                detail="Uses a generic greeting instead of the recipient's name — common in "
+                detail="Uses a generic greeting instead of the recipient's name - common in "
                 "both mass phishing and legitimate bulk/marketing mail, so weak on its own.",
                 evidence=", ".join(greeting_hits),
                 phishing_signal=False,
@@ -109,7 +109,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                     detail=(
                         f"Found {len(hidden_style_hits)} instance(s) of CSS commonly used to "
                         "hide text from the reader (white-on-white, zero font size, display:none) "
-                        "while keeping it machine-readable — used both for filter evasion and "
+                        "while keeping it machine-readable - used both for filter evasion and "
                         "to stuff invisible keywords."
                     ),
                 )

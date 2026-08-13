@@ -1,7 +1,7 @@
 """Aggregates analyzer findings into a verdict.
 
 Two running totals are kept: an overall score (every finding) and a
-phishing score (only findings with phishing_signal=True — i.e. credential
+phishing score (only findings with phishing_signal=True - i.e. credential
 theft, malware delivery, targeted fraud, active impersonation). A message
 can score moderately overall while being driven almost entirely by
 bulk/marketing-style signals; that pattern is labeled Spam, not Phishing,
@@ -42,7 +42,7 @@ def _label(total: int, phishing: int, findings: list[Finding]) -> str:
         return "Likely Legitimate"
 
     if has_critical or phishing >= _MALICIOUS_MIN:
-        return "Malicious — High Confidence"
+        return "Malicious - High Confidence"
 
     if phishing >= _PHISHING_MIN:
         return "Phishing"
@@ -57,14 +57,46 @@ def _label(total: int, phishing: int, findings: list[Finding]) -> str:
     return "Likely Legitimate"
 
 
-def _fallback_summary(label: str, findings: list[Finding]) -> str:
-    if not findings:
-        return "No notable indicators found in this message."
+_LABEL_OPENER = {
+    "Likely Legitimate": "Nothing notable was found. This message does not show the patterns this tool checks for.",
+    "Spam / Unwanted": "This looks like unsolicited bulk/marketing mail rather than a targeted attack - "
+    "no credential-theft, malware-delivery, or impersonation mechanism was found.",
+    "Suspicious": "This message has some real indicators, but not enough or not strong enough to call "
+    "it confirmed phishing outright - worth a closer look.",
+    "Phishing": "This message shows clear, specific evidence of a phishing attempt.",
+    "Malicious - High Confidence": "This message shows strong, specific evidence of a phishing or "
+    "malware-delivery attempt.",
+}
 
-    ranked = sorted(findings, key=lambda f: SEVERITY_WEIGHT[f.severity], reverse=True)
-    top = ranked[:4]
-    bullet_lines = "\n".join(f"- {f.title}: {f.detail}" for f in top)
-    return f"Verdict: {label}.\n\nTop indicators:\n{bullet_lines}"
+
+def _fallback_summary(label: str, findings: list[Finding]) -> str:
+    opener = _LABEL_OPENER.get(label, f"Verdict: {label}.")
+
+    key_evidence = sorted(
+        (f for f in findings if f.severity in (Severity.CRITICAL, Severity.HIGH)),
+        key=lambda f: SEVERITY_WEIGHT[f.severity],
+        reverse=True,
+    )
+
+    if not key_evidence:
+        supporting = sorted(findings, key=lambda f: SEVERITY_WEIGHT[f.severity], reverse=True)[:3]
+        if not supporting:
+            return opener
+        lines = "\n".join(f"- {f.title}: {f.detail}" for f in supporting)
+        return f"{opener}\n\nWhat was found (lower-confidence signals):\n{lines}"
+
+    # Lead with the evidence that actually drives the verdict, in plain
+    # sentences - this is what should answer "what exactly is suspicious
+    # here, and what's the specific link/domain/attachment involved."
+    lines = "\n".join(f"- {f.detail}" + (f" (evidence: {f.evidence})" if f.evidence else "") for f in key_evidence)
+    summary = f"{opener}\n\nKey evidence:\n{lines}"
+
+    supporting = [
+        f for f in findings if f.severity not in (Severity.CRITICAL, Severity.HIGH)
+    ]
+    if supporting:
+        summary += f"\n\nPlus {len(supporting)} additional lower-confidence signal(s) - see full findings below."
+    return summary
 
 
 def build_verdict(findings: list[Finding]) -> Verdict:

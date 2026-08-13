@@ -69,7 +69,7 @@ class Attachment:
     size: int
     sha256: str
     # Raw bytes kept only transiently in memory for the current analysis run
-    # (e.g. to peek at zip flags) — never included in to_dict()/report output.
+    # (e.g. to peek at zip flags) - never included in to_dict()/report output.
     raw: bytes = field(default=b"", repr=False, compare=False)
 
     def to_dict(self) -> dict:

@@ -2,7 +2,7 @@
 
 Fully optional: with no ANTHROPIC_API_KEY set, this module is never invoked
 (the CLI checks first) and PhishAnalyzer's heuristic verdict/summary stands
-on its own. Only already-extracted, structured findings are sent — never the
+on its own. Only already-extracted, structured findings are sent - never the
 raw email body/HTML, and never anything that would cause a link to be
 fetched or rendered.
 """
@@ -18,7 +18,7 @@ DEFAULT_MODEL = os.environ.get("PHISHANALYZER_MODEL", "claude-haiku-4-5-20251001
 
 _SYSTEM_PROMPT = (
     "You are assisting a SOC analyst triaging a user-reported email. You are given "
-    "already-extracted static findings, not the raw email — do not treat any URL or "
+    "already-extracted static findings, not the raw email - do not treat any URL or "
     "domain in the findings as something to visit or trust; they are evidence only. "
     "Write a short, plain-language executive summary (4-6 sentences) covering: what "
     "kind of message this most likely is, the strongest evidence for that call, and a "
@@ -52,7 +52,7 @@ def _build_prompt(parsed: ParsedEmail, verdict: Verdict, findings) -> str:
 def summarize(parsed: ParsedEmail, verdict: Verdict, findings) -> str | None:
     """Return an AI-written summary, or None if unavailable/failed.
 
-    Never raises — any failure (missing package, missing/invalid key, network
+    Never raises - any failure (missing package, missing/invalid key, network
     error, rate limit) falls back to None so the caller keeps using the
     heuristic summary instead.
     """

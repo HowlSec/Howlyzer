@@ -13,7 +13,7 @@ def _verdict_for(filename):
 
 def test_phishing_sample_scores_as_phishing_or_worse():
     verdict, findings = _verdict_for("sample_phish.eml")
-    assert verdict.label in ("Phishing", "Malicious — High Confidence")
+    assert verdict.label in ("Phishing", "Malicious - High Confidence")
     titles = {f.title for f in findings}
     assert any("does not match" in t or "Lookalike" in t or "credential-harvesting" in t for t in titles)
 

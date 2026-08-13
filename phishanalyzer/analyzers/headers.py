@@ -14,7 +14,7 @@ def _registrable_domain(domain: str) -> str:
 
     Good enough to compare "mail.paypal.com" vs "paypal.com" as related, and
     "paypal.com" vs "paypal-secure.com" as unrelated. Not perfect for
-    multi-part ccTLDs (co.uk etc.) — those are treated slightly too
+    multi-part ccTLDs (co.uk etc.) - those are treated slightly too
     coarsely, which only makes this check more conservative, not less.
     """
     domain = domain.lower().strip(".")
@@ -73,7 +73,7 @@ def _check_auth_results(parsed: ParsedEmail) -> list[Finding]:
                     category=Category.AUTH,
                     severity=Severity.MEDIUM,
                     title=f"{mech.upper()} check did not pass cleanly",
-                    detail=f"{mech.upper()}={verdict} — weaker than a clean pass. "
+                    detail=f"{mech.upper()}={verdict} - weaker than a clean pass. "
                     "Common with legitimate mailing-list or forwarded mail, but also with spoofing.",
                     evidence=f"{mech}={verdict}",
                     phishing_signal=verdict not in ("none",),
