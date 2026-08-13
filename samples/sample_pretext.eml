@@ -1,0 +1,25 @@
+Delivered-To: audrey@example-corp.com
+Received: from mail-qv1-xf2d.google.com (2607:f8b0:4864:20::f2d)
+	by mx.example-corp.com with ESMTP id pretext001
+	for <audrey@example-corp.com>; Wed, 12 Aug 2026 22:12:01 +0000
+Authentication-Results: mx.example-corp.com;
+	spf=pass smtp.mailfrom=gmail.com;
+	dkim=pass header.d=gmail.com;
+	dmarc=pass header.from=gmail.com
+From: "12-Aug-26" <boardallocation56@gmail.com>
+To: audrey@example-corp.com
+Subject: Re: Quick question
+Date: Wed, 12 Aug 2026 18:11:49 -0400
+MIME-Version: 1.0
+Message-ID: <pretext-demo-0001@gmail.com>
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+<html><body>
+<div>CONFIRM YOU RECEIVE MY MAIL!</div>
+<br>
+<div>Hello,</div>
+<div>Easiest number to reach you?</div>
+<div>Appreciated!</div>
+<div>Giles Whiting</div>
+</body></html>

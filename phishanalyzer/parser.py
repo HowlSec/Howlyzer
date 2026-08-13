@@ -78,6 +78,56 @@ def _extract_html_links(html_body: str) -> list[ExtractedLink]:
     return parser.links
 
 
+class _TextExtractor(HTMLParser):
+    """Pulls out roughly what a reader would see, ignoring markup/scripts/styles.
+
+    Used as a fallback when a message has no text/plain part at all (common —
+    plenty of real mail, legitimate and malicious alike, is HTML-only). Every
+    content-based check (urgency language, BEC phrasing, greetings) reads
+    ParsedEmail.body_text, so without this fallback those checks are silently
+    blind on any HTML-only email.
+    """
+
+    _BLOCK_TAGS = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote"}
+    _SKIP_TAGS = {"script", "style"}
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._parts: list[str] = []
+        self._skip_depth = 0
+
+    def handle_starttag(self, tag: str, attrs) -> None:
+        tag = tag.lower()
+        if tag in self._SKIP_TAGS:
+            self._skip_depth += 1
+        elif tag in self._BLOCK_TAGS:
+            self._parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.lower()
+        if tag in self._SKIP_TAGS and self._skip_depth > 0:
+            self._skip_depth -= 1
+        elif tag in self._BLOCK_TAGS:
+            self._parts.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        if self._skip_depth == 0:
+            self._parts.append(data)
+
+    def get_text(self) -> str:
+        lines = [line.strip() for line in "".join(self._parts).splitlines()]
+        return "\n".join(line for line in lines if line)
+
+
+def _html_to_text(html_body: str) -> str:
+    parser = _TextExtractor()
+    try:
+        parser.feed(html_body)
+    except Exception:
+        return ""
+    return parser.get_text()
+
+
 def _extract_bare_urls(text: str) -> list[ExtractedLink]:
     return [ExtractedLink(url=m.group(0).rstrip(".,;:)]\"'")) for m in _URL_RE.finditer(text or "")]
 
@@ -167,6 +217,9 @@ def _parse_eml_bytes(raw: bytes, source_path: str) -> ParsedEmail:
 
     links = _extract_html_links(body_html) + _extract_bare_urls(body_text)
 
+    if not body_text.strip() and body_html:
+        body_text = _html_to_text(body_html)
+
     from_display = ""
     from_addr = ""
     from_header = headers.get("From", "")
@@ -209,6 +262,9 @@ def _parse_msg_file(path: Path) -> ParsedEmail:
         body_html = msg.htmlBody.decode("utf-8", "ignore") if isinstance(msg.htmlBody, bytes) else (msg.htmlBody or "")
 
         links = _extract_html_links(body_html) + _extract_bare_urls(body_text)
+
+        if not body_text.strip() and body_html:
+            body_text = _html_to_text(body_html)
 
         attachments: list[Attachment] = []
         for att in msg.attachments:

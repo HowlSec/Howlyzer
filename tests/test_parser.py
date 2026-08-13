@@ -45,3 +45,14 @@ def test_oversized_file_is_rejected_without_being_read(monkeypatch):
     monkeypatch.setattr(parser_module, "MAX_FILE_SIZE_BYTES", 10)
     with pytest.raises(FileTooLargeError):
         load_email(SAMPLES / "sample_phish.eml")
+
+
+def test_html_only_message_still_populates_body_text():
+    # Regression guard: a message with no text/plain part at all (common —
+    # this exact pattern is what caused a real reported email to score 0
+    # findings, since every content-based check reads body_text) must still
+    # get a usable plain-text rendering derived from the HTML part.
+    parsed = load_email(SAMPLES / "sample_pretext.eml")
+    assert parsed.body_text.strip()
+    assert "CONFIRM YOU RECEIVE MY MAIL" in parsed.body_text
+    assert "Giles Whiting" in parsed.body_text

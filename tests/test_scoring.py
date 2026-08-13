@@ -27,3 +27,12 @@ def test_spam_sample_is_labeled_spam_not_phishing():
     verdict, findings = _verdict_for("sample_spam.eml")
     assert verdict.label == "Spam / Unwanted"
     assert verdict.phishing_score == 0
+
+
+def test_pretext_sample_is_not_likely_legitimate():
+    # Regression guard for a real reported email that used to score 0
+    # findings entirely (HTML-only body + clean auth + signed-name mismatch
+    # the old checks couldn't see). Must land above "nothing to see here."
+    verdict, findings = _verdict_for("sample_pretext.eml")
+    assert verdict.label != "Likely Legitimate"
+    assert verdict.score > 0
