@@ -19,7 +19,15 @@ if not exist "%VENV_PY%" (
     exit /b 1
 )
 
-"%VENV_PY%" -m phishanalyzer "%~1" --format all --output-dir "%SCRIPT_DIR%reports"
+REM phishanalyzer isn't pip-installed as a package (only its dependencies
+REM are) — "python -m phishanalyzer" only finds it if the working directory
+REM is this folder. Force that explicitly so this works no matter how the
+REM .bat was launched (typed from elsewhere, a Desktop shortcut with a
+REM different "Start in" path, dropped onto directly, etc).
+set EMAIL_FILE=%~1
+cd /d "%SCRIPT_DIR%"
+
+"%VENV_PY%" -m phishanalyzer "%EMAIL_FILE%" --format all --output-dir "%SCRIPT_DIR%reports"
 
 echo.
 echo Report saved to: %SCRIPT_DIR%reports
