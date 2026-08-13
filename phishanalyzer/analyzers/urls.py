@@ -1,4 +1,4 @@
-"""Static URL/link analysis. Never fetches, resolves, or connects to anything —
+"""Static URL/link analysis. Never fetches, resolves, or connects to anything -
 every check here works purely off the URL string as written in the email."""
 
 from __future__ import annotations
@@ -141,7 +141,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                     severity=Severity.HIGH,
                     title="URL uses the userinfo '@' trick",
                     detail="Everything before '@' in a URL's authority section is ignored by "
-                    "browsers — text made to look like a trusted domain can precede '@' while "
+                    "browsers - text made to look like a trusted domain can precede '@' while "
                     "the real destination follows it.",
                     evidence=link.url,
                     mitre="T1566.002",
@@ -153,7 +153,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                 Finding(
                     category=Category.URL,
                     severity=Severity.HIGH,
-                    title="Punycode (IDN) domain — possible homograph attack",
+                    title="Punycode (IDN) domain - possible homograph attack",
                     detail=f"'{host}' contains an xn-- encoded label. This is how lookalike "
                     "domains using non-Latin characters that visually resemble a trusted "
                     "brand's domain are represented under the hood.",

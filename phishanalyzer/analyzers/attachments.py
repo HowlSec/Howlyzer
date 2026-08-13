@@ -1,6 +1,6 @@
 """Static attachment triage: extension risk, macro-capable formats, double
 extensions, encrypted archives. Nothing is ever extracted, opened, or executed
-— attachments were already read as raw bytes once, during parsing, purely to
+- attachments were already read as raw bytes once, during parsing, purely to
 compute their size and SHA-256."""
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ def _all_extensions(filename: str) -> list[str]:
 def _zip_is_encrypted(att: Attachment) -> bool | None:
     """Return True if a .zip attachment has an encrypted entry, None if unknown.
 
-    Uses zipfile purely to read the central directory / local headers —
+    Uses zipfile purely to read the central directory / local headers -
     nothing is ever decompressed or extracted.
     """
     if not att.raw:
@@ -101,7 +101,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                     severity=Severity.CRITICAL,
                     title="Double extension used to disguise an executable",
                     detail=f"'{att.filename}' ends in a dangerous extension after what looks "
-                    "like a document/image extension — a classic trick since Windows often "
+                    "like a document/image extension - a classic trick since Windows often "
                     "hides the real (final) extension by default.",
                     evidence=att.filename,
                     mitre="T1036.007",
@@ -119,7 +119,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                         detail=(
                             f"'{att.filename}' contains an encrypted entry (its contents "
                             "could not be listed without the password). This is a well-known "
-                            "technique to smuggle malware past mail-gateway AV scanning — "
+                            "technique to smuggle malware past mail-gateway AV scanning - "
                             "especially suspicious if the password appears in the email body."
                         ),
                         evidence=f"{att.filename}  sha256={att.sha256}",
@@ -133,7 +133,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
                         severity=Severity.LOW,
                         title="Zip archive attachment",
                         detail=f"'{att.filename}' is a .zip archive. Not encrypted, but "
-                        "archive contents were not enumerated in this pass — check separately "
+                        "archive contents were not enumerated in this pass - check separately "
                         "if further review is warranted.",
                         evidence=f"{att.filename}  sha256={att.sha256}",
                         phishing_signal=False,

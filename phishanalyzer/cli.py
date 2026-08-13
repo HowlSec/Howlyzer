@@ -17,7 +17,7 @@ _EXIT_BY_LABEL = {
     "Spam / Unwanted": 0,
     "Suspicious": 1,
     "Phishing": 2,
-    "Malicious — High Confidence": 2,
+    "Malicious - High Confidence": 2,
 }
 
 _EMAIL_EXTENSIONS = {".eml", ".msg"}

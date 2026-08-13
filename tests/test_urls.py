@@ -33,7 +33,7 @@ def test_levenshtein_distance():
 
 def test_dedupe_links_collapses_text_and_html_copies():
     # Same URL appears once as a bare-text URL (no anchor text) and once as
-    # an HTML <a> href (with anchor text) — the common multipart/alternative case.
+    # an HTML <a> href (with anchor text) - the common multipart/alternative case.
     links = [
         ExtractedLink(url="https://evil.tk/login", anchor_text="Verify your account"),
         ExtractedLink(url="https://evil.tk/login", anchor_text=""),
