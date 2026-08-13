@@ -125,13 +125,38 @@ Try it right now against the bundled samples:
 
 ### Where to get the `.eml`/`.msg` file from
 
-- **Outlook (desktop):** drag the reported message out of Outlook onto your
-  desktop/folder — it saves as `.msg`.
-- **Outlook (web) / Gmail:** open the message → "..." menu → **Download
-  message** / **Show original → Download original** — saves as `.eml`.
-- Forwarded reports as an *attachment* (not inline) preserve the original
-  headers, which is what makes SPF/DKIM/DMARC and sender-alignment checks
-  possible — always ask users to forward as an attachment when you can.
+PhishAnalyzer reads both Outlook's native `.msg` format and the universal
+`.eml` (RFC822) format that Gmail, ProtonMail, and every other mail provider
+can export — so it works regardless of which mailbox the report came from.
+
+**Outlook (desktop app)**
+- Drag the message out of Outlook onto a folder/the `analyze.bat` shortcut —
+  saves as `.msg` automatically, or
+- Open it → **File → Save As** → keep the default **Outlook Message Format
+  (.msg)**.
+
+**Outlook (web / outlook.com)**
+- Open the message → **...** (More actions) → **View → View message
+  source**, or use the **Download** option if shown — saves as `.eml`.
+
+**Gmail**
+- Open the message → **⋮** (three dots, top right of the message) →
+  **Show original** → **Download original** — saves as `.eml` with full
+  original headers (this is the one you want for SPF/DKIM/DMARC checks to
+  work — it's the raw source, not a re-rendered copy).
+- A simpler **Download message** option is sometimes available directly in
+  the same **⋮** menu — also produces a usable `.eml`.
+
+**ProtonMail (web, mail.proton.me)**
+- Open the message → **⋯** (More) → **Export** → choose a save location —
+  saves as `.eml`. ([Proton's own docs](https://proton.me/support/export-import-emails))
+
+**Any provider, if forwarded to you as an attachment**
+- If a colleague forwards the suspicious email *with the original attached*
+  (not just forwarded inline), save/drag out that attachment instead of the
+  forwarding wrapper — always ask reporters to forward as an attachment when
+  possible, since that's what preserves the original headers this tool
+  actually checks.
 
 ## Optional: AI-written executive summary (Claude)
 
