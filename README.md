@@ -67,7 +67,11 @@ nothing is ever opened regardless.
 
 - **Authentication & alignment** — SPF/DKIM/DMARC results from the
   `Authentication-Results` header; From vs Reply-To vs Return-Path domain
-  mismatches (a classic "route replies to an attacker mailbox" tell).
+  mismatches (a classic "route replies to an attacker mailbox" tell); a
+  body signed with a name that has nothing to do with the actual sending
+  identity (pretexting — technically clean headers, real webmail account,
+  but "signed" by someone else entirely); a From display name shaped like
+  a date rather than a person/org (bulk-account artifact).
 - **Brand impersonation** — sender display name claims to be a known brand
   (PayPal, Microsoft, your bank, etc.) while the actual domain isn't theirs;
   same check applied to links. Fully editable — see below.

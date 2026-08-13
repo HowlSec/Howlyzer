@@ -174,9 +174,99 @@ def _check_brand_impersonation(parsed: ParsedEmail, indicators: dict) -> list[Fi
     return findings
 
 
+_SIGNOFF_WORDS = {
+    "regards", "thanks", "thank you", "best", "best regards", "warm regards",
+    "sincerely", "cheers", "appreciated", "kind regards", "many thanks",
+    "respectfully", "yours truly", "yours sincerely", "warmly",
+}
+_NAME_LINE_RE = re.compile(r"^[A-Z][a-zA-Z'’.-]+(?:\s+[A-Z][a-zA-Z'’.-]+){1,2}$")
+_DATE_LIKE_DISPLAY_RE = re.compile(
+    r"^\d{1,2}[-/\s]+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[-/\s]+\d{2,4}$"
+    r"|^\d{1,2}[-/]\d{1,2}[-/]\d{2,4}$",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_signoff(line: str) -> bool:
+    return line.strip().lower().rstrip(",.!:") in _SIGNOFF_WORDS
+
+
+def _extract_signed_name(body_text: str) -> str | None:
+    """Find a name-shaped line right after a sign-off word ('Regards, <Name>')."""
+    lines = [line.strip() for line in (body_text or "").splitlines() if line.strip()]
+    for i, line in enumerate(lines):
+        if _looks_like_signoff(line):
+            for candidate in lines[i + 1 : i + 3]:
+                if _NAME_LINE_RE.match(candidate):
+                    return candidate
+    return None
+
+
+def _name_overlaps(name: str, *haystacks: str) -> bool:
+    tokens = {t.lower() for t in re.findall(r"[a-zA-Z']+", name) if len(t) > 1}
+    if not tokens:
+        return False
+    return any(tok in (haystack or "").lower() for haystack in haystacks for tok in tokens)
+
+
+def _check_signature_mismatch(parsed: ParsedEmail) -> list[Finding]:
+    """Body signed by a name that has nothing to do with who actually sent it.
+
+    A classic pretexting pattern precisely *because* it leaves the technical
+    headers (SPF/DKIM/DMARC, From domain) completely clean — the account
+    sending the mail is real, it just isn't the person the message claims to
+    be from. Keyword/domain checks alone can't see this; only comparing what
+    the message signs itself as against who actually sent it can.
+    """
+    findings: list[Finding] = []
+    signed_name = _extract_signed_name(parsed.body_text)
+    if signed_name and not _name_overlaps(signed_name, parsed.from_display, parsed.from_addr):
+        findings.append(
+            Finding(
+                category=Category.SPOOFING,
+                severity=Severity.MEDIUM,
+                title="Message is signed by a name that doesn't match the sender",
+                detail=(
+                    f"The email body is signed '{signed_name}', but the actual sending "
+                    f"identity is \"{parsed.from_display}\" <{parsed.from_addr}> - nothing "
+                    "ties the two together. A common pretexting pattern: sign as a real, "
+                    "trusted person while actually sending from an unrelated account, "
+                    "often to build rapport before a follow-up ask (e.g. 'what's your "
+                    "phone number', then a fraud attempt by phone or a later email)."
+                ),
+                evidence=f"Signed as: {signed_name}  |  Actually from: \"{parsed.from_display}\" <{parsed.from_addr}>",
+                mitre="T1656",
+            )
+        )
+    return findings
+
+
+def _check_date_like_display_name(parsed: ParsedEmail) -> list[Finding]:
+    findings: list[Finding] = []
+    display = (parsed.from_display or "").strip()
+    if display and _DATE_LIKE_DISPLAY_RE.match(display):
+        findings.append(
+            Finding(
+                category=Category.SPOOFING,
+                severity=Severity.LOW,
+                title="Sender display name looks like a date, not a person/organization",
+                detail=(
+                    f"The From display name is '{display}' - a date-shaped string rather "
+                    "than an actual name. Sometimes a leftover artifact of bulk-registered "
+                    "or automation-driven accounts used for outreach campaigns, rather than "
+                    "a real personal or corporate identity."
+                ),
+                evidence=f"From display name: {display}",
+            )
+        )
+    return findings
+
+
 def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
     findings: list[Finding] = []
     findings.extend(_check_auth_results(parsed))
     findings.extend(_check_alignment(parsed))
     findings.extend(_check_brand_impersonation(parsed, indicators))
+    findings.extend(_check_signature_mismatch(parsed))
+    findings.extend(_check_date_like_display_name(parsed))
     return findings
