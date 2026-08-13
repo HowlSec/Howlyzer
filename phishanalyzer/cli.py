@@ -84,7 +84,27 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _harden_console_encoding() -> None:
+    """Never let attacker-controlled Unicode crash the console.
+
+    Subject lines, display names, and attachment filenames come straight
+    from the (untrusted) email and can contain arbitrary Unicode. Windows'
+    legacy console (cmd.exe without UTF-8 mode) uses a limited codepage
+    (e.g. cp1252) and raises UnicodeEncodeError on anything outside it,
+    which would otherwise crash mid-report on a specially crafted email.
+    Reconfiguring with errors="replace" makes unencodable characters
+    degrade to a placeholder instead of killing the process. No-op on
+    platforms/terminals that are already UTF-8 (the normal case).
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
+
 def main(argv: list[str] | None = None) -> int:
+    _harden_console_encoding()
     args = build_parser().parse_args(argv)
     target = Path(args.path)
 

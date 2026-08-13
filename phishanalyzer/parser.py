@@ -18,6 +18,17 @@ from pathlib import Path
 
 from .models import Attachment, ExtractedLink, ParsedEmail
 
+# A reported phishing email is realistically a few KB to a few MB. 50 MB is
+# generous enough for legitimate large attachments while still refusing to
+# load an arbitrarily huge (possibly malicious, memory-exhaustion-intended)
+# file fully into memory just because someone pointed the tool at it.
+MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
+
+
+class FileTooLargeError(ValueError):
+    """Raised when an input file exceeds MAX_FILE_SIZE_BYTES."""
+
+
 _URL_RE = re.compile(
     r"""(?xi)
     \b
@@ -255,6 +266,13 @@ def load_email(path: str | Path) -> ParsedEmail:
     saved with a generic name).
     """
     path = Path(path)
+    size = path.stat().st_size
+    if size > MAX_FILE_SIZE_BYTES:
+        raise FileTooLargeError(
+            f"{path} is {size / 1_048_576:.1f} MB, over the {MAX_FILE_SIZE_BYTES / 1_048_576:.0f} MB "
+            "limit for a reported email. Refusing to load it fully into memory."
+        )
+
     suffix = path.suffix.lower()
 
     if suffix == ".msg":

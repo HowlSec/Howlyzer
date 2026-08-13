@@ -1,6 +1,8 @@
+import pytest
 from conftest import SAMPLES
 
-from phishanalyzer.parser import load_email
+import phishanalyzer.parser as parser_module
+from phishanalyzer.parser import FileTooLargeError, load_email
 
 
 def test_parses_headers_and_addresses():
@@ -35,3 +37,11 @@ def test_authentication_results_multi_line_preserved():
     auth = parsed.headers.get("Authentication-Results", "")
     assert "spf=fail" in auth
     assert "dmarc=fail" in auth
+
+
+def test_oversized_file_is_rejected_without_being_read(monkeypatch):
+    # Force the limit far below the real sample's size so this test doesn't
+    # need to actually create a 50 MB fixture file.
+    monkeypatch.setattr(parser_module, "MAX_FILE_SIZE_BYTES", 10)
+    with pytest.raises(FileTooLargeError):
+        load_email(SAMPLES / "sample_phish.eml")

@@ -325,6 +325,13 @@ def render_html(report: Report) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Defense-in-depth: this document embeds attacker-controlled email content
+     (subject, sender, attachment names, etc). Every such value is HTML-escaped
+     before being written into this template, but this CSP is a second, independent
+     layer — it blocks all script execution and all outbound network activity for
+     this page regardless, so a future escaping bug could not turn into anything
+     that runs code or calls out to the network. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'none'; script-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';">
 <title>PhishAnalyzer report - {_esc(parsed.subject) or 'no subject'}</title>
 <style>
   :root {{
