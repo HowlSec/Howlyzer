@@ -1,0 +1,8 @@
+# Core — required
+rich>=13.7
+extract-msg>=0.48
+
+# Optional — only needed for the AI-generated executive summary (Claude).
+# The tool works fully without it; omit this line if you don't want the
+# dependency and never plan to set ANTHROPIC_API_KEY.
+anthropic>=0.40

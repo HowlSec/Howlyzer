@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+reports/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.env
+
+# Real reported emails you analyze locally should generally not be committed —
+# they can contain live IOCs, victim PII, or malware. Keep them out of git
+# unless you specifically intend to version a sanitized sample set.
+*.eml
+*.msg
+!samples/*.eml
+!samples/*.msg

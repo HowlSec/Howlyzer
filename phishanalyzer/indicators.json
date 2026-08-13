@@ -1,0 +1,75 @@
+{
+  "_comment": "Editable knowledge base. Add your own commonly-impersonated brands, local banks, and phrases your organization actually sees. Domains listed per brand are the brand's REAL domains — anything claiming to be that brand from a different domain is flagged.",
+
+  "impersonated_brands": {
+    "PayPal": ["paypal.com"],
+    "Microsoft": ["microsoft.com", "office.com", "office365.com", "live.com", "outlook.com", "sharepoint.com"],
+    "Google": ["google.com", "gmail.com", "accounts.google.com"],
+    "Apple": ["apple.com", "icloud.com"],
+    "Amazon": ["amazon.com"],
+    "Netflix": ["netflix.com"],
+    "DHL": ["dhl.com"],
+    "FedEx": ["fedex.com"],
+    "UPS": ["ups.com"],
+    "USPS": ["usps.com"],
+    "Bank of America": ["bankofamerica.com"],
+    "Chase": ["chase.com"],
+    "Wells Fargo": ["wellsfargo.com"],
+    "Citibank": ["citi.com", "citibank.com"],
+    "American Express": ["americanexpress.com", "aexp.com"],
+    "LinkedIn": ["linkedin.com"],
+    "Facebook": ["facebook.com", "fb.com"],
+    "Instagram": ["instagram.com"],
+    "IRS": ["irs.gov"],
+    "Dropbox": ["dropbox.com"],
+    "DocuSign": ["docusign.com", "docusign.net"],
+    "Zoom": ["zoom.us"],
+    "Adobe": ["adobe.com"]
+  },
+
+  "suspicious_tlds": [
+    ".tk", ".ml", ".ga", ".cf", ".gq", ".xyz", ".top", ".club", ".work",
+    ".support", ".win", ".loan", ".men", ".party", ".review", ".stream",
+    ".science", ".kim", ".country", ".cricket", ".accountant", ".faith",
+    ".date", ".racing", ".bid", ".click", ".link", ".icu", ".rest"
+  ],
+
+  "url_shorteners": [
+    "bit.ly", "tinyurl.com", "goo.gl", "t.co", "ow.ly", "is.gd", "buff.ly",
+    "rebrand.ly", "cutt.ly", "tiny.cc", "shorte.st", "rb.gy", "s.id",
+    "v.gd", "tr.im", "clck.ru", "lnkd.in", "bl.ink", "shorturl.at"
+  ],
+
+  "credential_harvest_paths": [
+    "/login", "/signin", "/sign-in", "/log-in", "/verify-account",
+    "/verification", "/webscr", "/wp-login", "/authenticate", "/validate",
+    "/password-reset", "/reset-password", "/unlock-account", "/reactivate-account"
+  ],
+
+  "urgency_keywords": [
+    "verify your account", "account suspended", "account has been limited",
+    "unusual activity", "unusual sign-in", "act now", "immediate action",
+    "confirm your identity", "will be closed", "will be suspended",
+    "limited time", "final notice", "failure to", "unauthorized access",
+    "security alert", "update your payment", "you have won", "claim your prize",
+    "urgent action required", "password will expire", "verify your identity",
+    "your account will be deactivated", "click below to avoid"
+  ],
+
+  "generic_greetings": [
+    "dear customer", "dear user", "dear valued customer", "dear sir/madam",
+    "dear account holder", "dear member", "dear client"
+  ],
+
+  "financial_bec_keywords": [
+    "wire transfer", "gift card", "aba routing", "swift code",
+    "invoice attached", "urgent payment", "update your banking",
+    "direct deposit change", "purchase gift cards", "outstanding invoice",
+    "payment details have changed"
+  ],
+
+  "free_webmail_domains": [
+    "gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "aol.com",
+    "icloud.com", "mail.com", "protonmail.com", "zoho.com", "gmx.com"
+  ]
+}

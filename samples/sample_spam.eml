@@ -1,0 +1,27 @@
+Delivered-To: alex@example-corp.com
+Received: from mail.dealsblast.example (mail.dealsblast.example [198.51.100.77])
+	by mx.example-corp.com with ESMTP id ghi789
+	for <alex@example-corp.com>; Thu, 10 Jul 2025 11:00:00 +0000
+Authentication-Results: mx.example-corp.com;
+	spf=pass smtp.mailfrom=deals@dealsblast.example;
+	dkim=pass header.d=dealsblast.example;
+	dmarc=pass header.from=dealsblast.example
+From: "Mega Deals Blast" <deals@dealsblast.example>
+To: alex@example-corp.com
+Subject: Dear Customer, LIMITED TIME offer inside - act now!
+Date: Thu, 10 Jul 2025 11:00:00 +0000
+MIME-Version: 1.0
+Message-ID: <blast-99231@dealsblast.example>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Dear Customer,
+
+Act now — this limited time offer won't last! Save 70% on everything in
+our store this week only.
+
+Shop the sale: https://shop.dealsblast.example/summer-sale
+
+Reply STOP to unsubscribe from future offers.
+
+Mega Deals Blast Team

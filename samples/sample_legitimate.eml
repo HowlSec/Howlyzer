@@ -1,0 +1,27 @@
+Delivered-To: alex@example-corp.com
+Received: from mail.vendor-tools.com (mail.vendor-tools.com [198.51.100.10])
+	by mx.example-corp.com with ESMTP id def456
+	for <alex@example-corp.com>; Wed, 09 Jul 2025 09:15:00 +0000
+Authentication-Results: mx.example-corp.com;
+	spf=pass smtp.mailfrom=notifications@vendor-tools.com;
+	dkim=pass header.d=vendor-tools.com;
+	dmarc=pass header.from=vendor-tools.com
+From: "Vendor Tools Billing" <notifications@vendor-tools.com>
+To: alex@example-corp.com
+Subject: Your invoice #4471 is ready
+Date: Wed, 09 Jul 2025 09:14:58 +0000
+MIME-Version: 1.0
+Message-ID: <inv-4471@vendor-tools.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hi Alex,
+
+Your monthly invoice (#4471) for Vendor Tools is now available in your
+account dashboard: https://app.vendor-tools.com/billing/invoices/4471
+
+Total due: $49.00, charged automatically to the card on file on 2025-07-15.
+
+Questions? Just reply to this email.
+
+— Vendor Tools Billing
