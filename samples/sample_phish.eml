@@ -1,0 +1,70 @@
+Delivered-To: victim@example-corp.com
+Received: from mail.paypa1-verify.tk (mail.paypa1-verify.tk [203.0.113.44])
+	by mx.example-corp.com with ESMTP id abc123
+	for <victim@example-corp.com>; Tue, 08 Jul 2025 14:02:11 +0000
+Authentication-Results: mx.example-corp.com;
+	spf=fail smtp.mailfrom=paypa1-verify.tk;
+	dkim=none (no signature);
+	dmarc=fail header.from=paypa1-verify.tk
+From: "PayPal Security" <security@paypa1-verify.tk>
+Reply-To: paypal-support@totally-unrelated-domain.xyz
+Return-Path: <bounce@totally-unrelated-domain.xyz>
+To: victim@example-corp.com
+Subject: Urgent: Your Account Has Been Limited - Verify Now
+Date: Tue, 08 Jul 2025 14:02:10 +0000
+MIME-Version: 1.0
+Message-ID: <sample-demo-0001@paypa1-verify.tk>
+Content-Type: multipart/mixed; boundary="MAIN_BOUNDARY_0001"
+
+This is a MIME-formatted message. If you see this text it means your
+email software does not support MIME formatted messages.
+
+--MAIN_BOUNDARY_0001
+Content-Type: multipart/alternative; boundary="ALT_BOUNDARY_0001"
+
+--ALT_BOUNDARY_0001
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Dear Customer,
+
+We have detected unusual activity on your account. Your account will be
+suspended within 24 hours unless you verify your identity immediately.
+
+Verify your account now: https://www.paypal.com/signin
+
+Failure to confirm your identity may result in permanent account closure.
+
+PayPal Security Team
+
+--ALT_BOUNDARY_0001
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+<html>
+<body>
+<p>Dear Customer,</p>
+<p>We have detected <b>unusual activity</b> on your account. Your account
+will be <b>suspended within 24 hours</b> unless you verify your identity
+immediately.</p>
+<p><a href="http://paypa1-verify.tk/login/verify.php">https://www.paypal.com/signin</a></p>
+<p>Failure to confirm your identity may result in permanent account closure.
+This is a final notice — act now to avoid losing access.</p>
+<p style="font-size:0px;color:#ffffff">ignore-this-hidden-tracking-token-af31c9</p>
+<p>PayPal Security Team</p>
+</body>
+</html>
+
+--ALT_BOUNDARY_0001--
+
+--MAIN_BOUNDARY_0001
+Content-Type: application/octet-stream; name="Invoice.pdf.exe"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="Invoice.pdf.exe"
+
+VGhpcyBpcyBhIGhhcm1sZXNzIHBsYWNlaG9sZGVyIHBheWxvYWQgZm9yIHRlc3RpbmcgUGhp
+c2hBbmFseXplcidzIGRvdWJsZS1leHRlbnNpb24gYW5kIGRhbmdlcm91cy1leHRlbnNpb24g
+ZGV0ZWN0b3JzLiBObyBleGVjdXRhYmxlIGNvZGUgaXMgcHJlc2VudCBpbiB0aGlzIHNhbXBs
+ZSBmaWxlLg==
+
+--MAIN_BOUNDARY_0001--
