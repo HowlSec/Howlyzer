@@ -22,6 +22,52 @@ If you need to safely detonate a URL or file, that's a separate, sandboxed
 job for something like a sandbox/VM or a threat-intel API — this tool tells
 you *what's worth doing that for*, and gives you the exact IOCs to feed in.
 
+## Security guarantees
+
+This tool exists specifically to be pointed at malicious content, so its own
+safety matters more than most. What's actually enforced, not just claimed:
+
+- **No network calls to anything in the email.** No URL is ever fetched, no
+  domain is ever resolved, no attachment is ever opened or executed. This
+  isn't just a design intention — `tests/test_no_unsafe_network_calls.py`
+  scans the entire codebase for `webbrowser`, `subprocess`, `os.system`,
+  `requests`/`httpx` calls, raw sockets, `eval`/`exec`, etc., and fails the
+  build if any of them show up outside the one intentional exception (the
+  optional Claude API call, which only ever talks to Anthropic's API — never
+  to anything derived from the email).
+- **Links are never clickable in the report.** Every URL/domain shown in the
+  HTML report is plain, defanged text (`hxxps://evil[.]tk`, not a real
+  scheme) — never an `<a href>`. Opening the report cannot open a link.
+- **The HTML report can't run anything, even if a bug slips through.** Every
+  attacker-controlled value (subject, sender name, filenames, evidence
+  strings) is HTML-escaped before being embedded. On top of that, the report
+  ships a strict Content-Security-Policy (`script-src 'none'`,
+  `connect-src 'none'`, `object-src 'none'`, ...) so even a future escaping
+  bug couldn't turn into working script execution or an outbound request —
+  defense in depth, not reliance on one layer.
+- **The console can't be crashed by a crafted email.** Subject lines and
+  attachment filenames are attacker-controlled and can contain arbitrary
+  Unicode. Windows' legacy console (`cmd.exe`) uses a limited codepage and
+  will raise `UnicodeEncodeError` — crashing the whole run — on characters
+  outside it; the CLI reconfigures stdout/stderr to degrade unencodable
+  characters to a placeholder instead of dying mid-report.
+- **The optional AI summary is hardened against prompt injection.** Sender
+  names, subjects, and finding text derived from the email are sent to
+  Claude wrapped in explicit `<untrusted_findings>` delimiters, with the
+  system prompt directly instructing it to treat everything inside as data
+  only — never as instructions — regardless of what it claims to be.
+- **Oversized files are rejected before being read into memory** (50 MB
+  cap) rather than risking memory exhaustion on a pathological input.
+
+**Known residual risk, by design tradeoff:** `.msg` parsing depends on the
+third-party [`extract-msg`](https://github.com/TeamMsgExtractor/msg-extractor)
+library to handle Outlook's proprietary binary format — like any parser
+handling untrusted binary input, a bug there is a bug this tool inherits.
+Keep it updated (`pip install -U extract-msg`). Legacy `.doc`/`.xls`/`.ppt`
+macro content is flagged by extension only, not deeply parsed (see
+Limitations below) — that's a coverage gap, not a code-execution risk, since
+nothing is ever opened regardless.
+
 ## What it checks
 
 - **Authentication & alignment** — SPF/DKIM/DMARC results from the
@@ -126,37 +172,51 @@ Try it right now against the bundled samples:
 ### Where to get the `.eml`/`.msg` file from
 
 PhishAnalyzer reads both Outlook's native `.msg` format and the universal
-`.eml` (RFC822) format that Gmail, ProtonMail, and every other mail provider
-can export — so it works regardless of which mailbox the report came from.
+`.eml` (RFC822) format that every mail provider on Earth can export — so it
+works regardless of which mailbox the report came from. Quick reference:
+
+| Provider | Menu path | Saves as |
+|---|---|---|
+| Outlook desktop | Drag the message onto a folder/the `analyze.bat` shortcut, **or** open it → **File → Save As** | `.msg` |
+| Outlook web (outlook.com) | Open message → **···** → **View → View message source** (or **Download** if shown) | `.eml` |
+| Gmail | Open message → **⋮** → **Show original** → **Download original** | `.eml` |
+| ProtonMail (web) | Open message → **⋯** (More) → **Export** | `.eml` |
+| Yahoo Mail | Open message → **More** (**···**) → **View raw message**, then save the page as `.eml`, or forward as attachment (see below) | `.eml` |
+| Apple Mail (macOS) | Select message → **File → Save As** → format **Raw Message Source** | `.eml` |
+| Thunderbird | Select message → **File → Save As → File**, or drag onto a folder | `.eml` |
+| Any other webmail/client | Look for **"View source"**, **"Show original"**, **"Download message"**, or **"Export"** — it's virtually always one of those four | `.eml` |
+
+Full steps for the three most common ones:
 
 **Outlook (desktop app)**
-- Drag the message out of Outlook onto a folder/the `analyze.bat` shortcut —
-  saves as `.msg` automatically, or
-- Open it → **File → Save As** → keep the default **Outlook Message Format
-  (.msg)**.
-
-**Outlook (web / outlook.com)**
-- Open the message → **...** (More actions) → **View → View message
-  source**, or use the **Download** option if shown — saves as `.eml`.
+1. Drag the message out of Outlook onto a folder or the `analyze.bat`
+   shortcut — Outlook exports it as `.msg` automatically on drop, or
+2. Open it → **File → Save As** → keep the default **Outlook Message Format
+   (.msg)** → Save.
 
 **Gmail**
-- Open the message → **⋮** (three dots, top right of the message) →
-  **Show original** → **Download original** — saves as `.eml` with full
-  original headers (this is the one you want for SPF/DKIM/DMARC checks to
-  work — it's the raw source, not a re-rendered copy).
-- A simpler **Download message** option is sometimes available directly in
-  the same **⋮** menu — also produces a usable `.eml`.
+1. Open the message → click **⋮** (three dots, top-right of the opened
+   message).
+2. Click **Show original**.
+3. On the page that opens, click **Download Original** near the top.
+4. That's your `.eml` — use **Show original → Download Original** specifically
+   (not just "Download message" if both appear), since it's the true raw
+   source with full headers, which is what the SPF/DKIM/DMARC checks need.
 
 **ProtonMail (web, mail.proton.me)**
-- Open the message → **⋯** (More) → **Export** → choose a save location —
-  saves as `.eml`. ([Proton's own docs](https://proton.me/support/export-import-emails))
+1. Open the message → click **⋯** (More, top-right).
+2. Click **Export**.
+3. Choose a save location — saves as `.eml`.
+   ([Proton's own docs](https://proton.me/support/export-import-emails))
 
-**Any provider, if forwarded to you as an attachment**
-- If a colleague forwards the suspicious email *with the original attached*
-  (not just forwarded inline), save/drag out that attachment instead of the
-  forwarding wrapper — always ask reporters to forward as an attachment when
-  possible, since that's what preserves the original headers this tool
-  actually checks.
+**Any provider, if the report reaches you forwarded**
+- If a colleague forwards the suspicious email *with the original message
+  attached* (not just forwarded inline as quoted text), save/drag out that
+  attachment instead of analyzing the forwarding wrapper — always ask
+  reporters to forward as an attachment when possible. This is what actually
+  matters for accuracy: the SPF/DKIM/DMARC and sender-alignment checks only
+  mean something against the *original* headers. A forwarded-inline copy has
+  your coworker's headers, not the attacker's, and will under-report.
 
 ## Optional: AI-written executive summary (Claude)
 
@@ -214,7 +274,7 @@ phishanalyzer/
   indicators.json          # editable knowledge base
   cli.py                    # command-line interface
 samples/                     # synthetic phishing / spam / legitimate examples used by tests
-tests/
+tests/                        # includes test_no_unsafe_network_calls.py — the safety-guarantee test
 setup.ps1                      # Windows installer
 analyze.bat                     # drag-and-drop launcher
 ```
@@ -235,5 +295,8 @@ analyze.bat                     # drag-and-drop launcher
 - Domain-comparison logic uses a simple last-two-labels heuristic, not a full
   public-suffix list — it's deliberately conservative (more likely to
   under-flag on multi-part ccTLDs like `.co.uk` than to false-positive).
+- Files over 50 MB are rejected outright (see Security guarantees above) —
+  if you legitimately need to analyze something larger, raise
+  `MAX_FILE_SIZE_BYTES` in `phishanalyzer/parser.py`.
 - This is one input into your decision-making, not a final verdict — treat
   "Suspicious" as "go look," not "definitely fine."
