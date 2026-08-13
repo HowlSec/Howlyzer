@@ -300,3 +300,8 @@ analyze.bat                     # drag-and-drop launcher
   `MAX_FILE_SIZE_BYTES` in `phishanalyzer/parser.py`.
 - This is one input into your decision-making, not a final verdict — treat
   "Suspicious" as "go look," not "definitely fine."
+
+## License
+
+[MIT](LICENSE) — use it, fork it, adapt it for your own org's brands and
+language freely.
