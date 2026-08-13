@@ -6,11 +6,6 @@ verdict — **Phishing**, **Spam / Unwanted**, **Suspicious**, or **Likely
 Legitimate** — with the specific evidence behind it, in seconds, without
 sending anything anywhere.
 
-Built after reading [this write-up](https://medium.com/@techalisa/i-built-a-phishing-triage-copilot-with-claude-ai-cyber-defense-ops-review-thoughts-on-vibe-coding-6a2b41b0efc8)
-about a Claude-based phishing triage copilot; this is a from-scratch local
-implementation of the same idea, adapted to answer "phishing or just spam?"
-specifically, and to run entirely on your own Windows machine.
-
 ## Why this exists — and what it deliberately does *not* do
 
 Every check here is **static**: it reads the email file as text and bytes.
