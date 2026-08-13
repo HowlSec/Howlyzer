@@ -1,4 +1,12 @@
-from phishanalyzer.analyzers.urls import _hostname, _is_ip_literal, _levenshtein, _looks_like_lookalike, _registrable_domain
+from phishanalyzer.analyzers.urls import (
+    _dedupe_links,
+    _hostname,
+    _is_ip_literal,
+    _levenshtein,
+    _looks_like_lookalike,
+    _registrable_domain,
+)
+from phishanalyzer.models import ExtractedLink
 
 
 def test_hostname_extraction():
@@ -21,6 +29,18 @@ def test_levenshtein_distance():
     assert _levenshtein("paypal", "paypal") == 0
     assert _levenshtein("paypal", "paypa1") == 1
     assert _levenshtein("paypal", "amazon") > 2
+
+
+def test_dedupe_links_collapses_text_and_html_copies():
+    # Same URL appears once as a bare-text URL (no anchor text) and once as
+    # an HTML <a> href (with anchor text) — the common multipart/alternative case.
+    links = [
+        ExtractedLink(url="https://evil.tk/login", anchor_text="Verify your account"),
+        ExtractedLink(url="https://evil.tk/login", anchor_text=""),
+    ]
+    deduped = _dedupe_links(links)
+    assert len(deduped) == 1
+    assert deduped[0].anchor_text == "Verify your account"
 
 
 def test_lookalike_domain_detection():

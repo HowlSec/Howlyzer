@@ -71,6 +71,23 @@ def _looks_like_lookalike(domain: str, real_domain: str) -> bool:
     return 0 < distance <= 2
 
 
+def _dedupe_links(links: list) -> list:
+    """Collapse the same URL appearing in both the text/plain and text/html
+    parts of a multipart/alternative message (the normal case for almost
+    every HTML email) into one entry, preferring whichever copy carries
+    anchor text (only HTML <a> tags have it)."""
+    by_url: dict[str, object] = {}
+    order: list[str] = []
+    for link in links:
+        existing = by_url.get(link.url)
+        if existing is None:
+            by_url[link.url] = link
+            order.append(link.url)
+        elif not existing.anchor_text and link.anchor_text:
+            by_url[link.url] = link
+    return [by_url[u] for u in order]
+
+
 def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
     findings: list[Finding] = []
     shorteners = set(indicators.get("url_shorteners", []))
@@ -83,7 +100,7 @@ def analyze(parsed: ParsedEmail, indicators: dict) -> list[Finding]:
 
     seen_hosts: set[str] = set()
 
-    for link in parsed.links:
+    for link in _dedupe_links(parsed.links):
         host = _hostname(link.url)
         if not host:
             continue
