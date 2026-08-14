@@ -364,9 +364,28 @@ samples/                     # synthetic phishing / spam / legitimate examples u
 tests/                        # includes test_no_unsafe_network_calls.py — the safety-guarantee test
 setup.ps1                      # Windows installer
 analyze.bat                     # Windows drag-and-drop launcher
+update.ps1                       # Windows updater (git pull + refresh deps)
 setup.sh                         # macOS/Linux installer
 analyze.sh                        # macOS/Linux launcher
+update.sh                         # macOS/Linux updater (git pull + refresh deps)
 ```
+
+## Updating to the latest version
+
+If you cloned the repo with `git clone` (not a ZIP download), pull the
+latest changes and refresh dependencies with one command:
+
+```powershell
+.\update.ps1
+```
+```bash
+./update.sh
+```
+
+Both are safe to re-run any time — they do a fast-forward-only `git pull`
+(refuses to run if it would overwrite local edits; commit or `git stash`
+first if you've customized `indicators.json`) and re-sync `.venv` against
+`requirements.txt`.
 
 ## Running the tests
 
