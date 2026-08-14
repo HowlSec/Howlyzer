@@ -236,11 +236,13 @@ Try it right now against the bundled samples:
 </details>
 
 Every run — console, drag-and-drop, or scripted — writes a self-contained,
-dark-mode HTML report to `reports/` (override with `--output-dir`) in
-addition to whatever `--format` prints, so there's always a shareable report
-on disk without having to remember a flag. The report path is printed after
-each run (`HTML report: reports\sample.html`). Pass `--no-html` to opt out
-(e.g. for quick console-only checks in a script).
+dark-mode HTML report to a `reports/` folder next to wherever the tool is
+installed (override with `--output-dir`), in addition to whatever `--format`
+prints, so there's always a shareable report on disk in a predictable place
+without having to remember a flag — it doesn't matter what directory you
+happened to run the command from. The report path is printed after each run
+(`HTML report: reports\sample.html`). Pass `--no-html` to opt out (e.g. for
+quick console-only checks in a script).
 
 **Exit codes** (useful for scripting/automation): `0` = legitimate or spam,
 `1` = suspicious, `2` = phishing or malicious.

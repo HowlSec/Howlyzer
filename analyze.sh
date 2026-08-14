@@ -28,7 +28,7 @@ email_file="$1"
 # the script was invoked from.
 cd "$script_dir"
 
-"$venv_py" -m phishanalyzer "$email_file" --format all --output-dir "$script_dir/reports"
+"$venv_py" -m phishanalyzer "$email_file" --format all
 
 echo ""
 echo "Report saved to: $script_dir/reports"

@@ -27,7 +27,7 @@ REM different "Start in" path, dropped onto directly, etc).
 set EMAIL_FILE=%~1
 cd /d "%SCRIPT_DIR%"
 
-"%VENV_PY%" -m phishanalyzer "%EMAIL_FILE%" --format all --output-dir "%SCRIPT_DIR%reports"
+"%VENV_PY%" -m phishanalyzer "%EMAIL_FILE%" --format all
 
 echo.
 echo Report saved to: %SCRIPT_DIR%reports
