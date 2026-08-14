@@ -177,14 +177,20 @@ this is the terminal equivalent.)
 <summary><strong>Windows (PowerShell)</strong></summary>
 
 ```powershell
-# Single file, verdict printed to the console
+# Verdict printed to the console, dark-mode HTML report auto-written to reports\
 .\.venv\Scripts\python.exe -m phishanalyzer path\to\reported_email.eml
 
 # A whole folder of reported emails at once
 .\.venv\Scripts\python.exe -m phishanalyzer C:\Users\you\Downloads\reported
 
-# Also write JSON + HTML reports
-.\.venv\Scripts\python.exe -m phishanalyzer email.eml --format all --output-dir reports
+# Also write a JSON report alongside the HTML one
+.\.venv\Scripts\python.exe -m phishanalyzer email.eml --format all
+
+# Write reports somewhere other than .\reports
+.\.venv\Scripts\python.exe -m phishanalyzer email.eml --output-dir C:\path\to\out
+
+# Console only, skip writing the HTML report
+.\.venv\Scripts\python.exe -m phishanalyzer email.eml --no-html
 
 # Skip the optional AI summary even if you have a key set
 .\.venv\Scripts\python.exe -m phishanalyzer email.eml --no-ai
@@ -202,14 +208,20 @@ Try it right now against the bundled samples:
 <summary><strong>macOS / Linux</strong></summary>
 
 ```bash
-# Single file, verdict printed to the console
+# Verdict printed to the console, dark-mode HTML report auto-written to reports/
 ./.venv/bin/python -m phishanalyzer path/to/reported_email.eml
 
 # A whole folder of reported emails at once
 ./.venv/bin/python -m phishanalyzer ~/Downloads/reported
 
-# Also write JSON + HTML reports
-./.venv/bin/python -m phishanalyzer email.eml --format all --output-dir reports
+# Also write a JSON report alongside the HTML one
+./.venv/bin/python -m phishanalyzer email.eml --format all
+
+# Write reports somewhere other than ./reports
+./.venv/bin/python -m phishanalyzer email.eml --output-dir /path/to/out
+
+# Console only, skip writing the HTML report
+./.venv/bin/python -m phishanalyzer email.eml --no-html
 
 # Skip the optional AI summary even if you have a key set
 ./.venv/bin/python -m phishanalyzer email.eml --no-ai
@@ -222,6 +234,13 @@ Try it right now against the bundled samples:
 ./.venv/bin/python -m phishanalyzer samples/sample_legitimate.eml
 ```
 </details>
+
+Every run — console, drag-and-drop, or scripted — writes a self-contained,
+dark-mode HTML report to `reports/` (override with `--output-dir`) in
+addition to whatever `--format` prints, so there's always a shareable report
+on disk without having to remember a flag. The report path is printed after
+each run (`HTML report: reports\sample.html`). Pass `--no-html` to opt out
+(e.g. for quick console-only checks in a script).
 
 **Exit codes** (useful for scripting/automation): `0` = legitimate or spam,
 `1` = suspicious, `2` = phishing or malicious.

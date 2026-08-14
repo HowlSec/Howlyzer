@@ -44,12 +44,16 @@ def _iter_input_files(target: Path) -> list[Path]:
     raise FileNotFoundError(f"No such file or directory: {target}")
 
 
-def _write_outputs(rep: Report, out_dir: Path, formats: set[str]) -> None:
+def _write_outputs(rep: Report, out_dir: Path, formats: set[str]) -> Path | None:
+    """Write the requested report file(s). Returns the HTML report's path, if written."""
     stem = Path(rep.parsed.source_path).stem
     if "json" in formats:
         (out_dir / f"{stem}.json").write_text(report.to_json(rep), encoding="utf-8")
+    html_path = None
     if "html" in formats:
-        (out_dir / f"{stem}.html").write_text(report.render_html(rep), encoding="utf-8")
+        html_path = out_dir / f"{stem}.html"
+        html_path.write_text(report.render_html(rep), encoding="utf-8")
+    return html_path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -62,12 +66,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--format",
         choices=["console", "json", "html", "all"],
         default="console",
-        help="Output format(s). 'all' writes json+html to --output-dir in addition to console.",
+        help="Output format(s) printed/written in addition to the always-on HTML report. "
+        "'all' also writes a JSON report to --output-dir.",
     )
     parser.add_argument(
         "--output-dir",
-        default=".",
-        help="Directory to write json/html reports into (default: current directory)",
+        default="reports",
+        help="Directory to write the report(s) into (default: reports)",
+    )
+    parser.add_argument(
+        "--no-html",
+        action="store_true",
+        help="Skip writing the HTML report (by default one is always written after analysis)",
     )
     parser.add_argument(
         "--no-ai",
@@ -121,9 +131,12 @@ def main(argv: list[str] | None = None) -> int:
     indicators = load_indicators(args.indicators)
     out_dir = Path(args.output_dir)
     formats = {"json", "html"} if args.format == "all" else {args.format}
+    if not args.no_html:
+        formats.add("html")
+    formats &= {"json", "html"}
     show_console = args.format in ("console", "all")
 
-    if formats & {"json", "html"}:
+    if formats:
         out_dir.mkdir(parents=True, exist_ok=True)
 
     worst_exit = 0
@@ -140,7 +153,9 @@ def main(argv: list[str] | None = None) -> int:
             if len(files) > 1:
                 print()
 
-        _write_outputs(rep, out_dir, formats & {"json", "html"})
+        html_path = _write_outputs(rep, out_dir, formats)
+        if html_path is not None:
+            print(f"HTML report: {html_path}")
 
         worst_exit = max(worst_exit, _EXIT_BY_LABEL.get(rep.verdict.label, 1))
 

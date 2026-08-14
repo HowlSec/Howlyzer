@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 from .iocs import defang
 from .models import Category, Finding, Report, Severity
@@ -313,6 +314,9 @@ def render_html(report: Report) -> str:
         for h in report.iocs.get("attachment_hashes", [])
     )
 
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    source_name = _esc(Path(parsed.source_path).name)
+
     ai_block = ""
     if report.ai_summary:
         ai_block = (
@@ -332,6 +336,7 @@ def render_html(report: Report) -> str:
      this page regardless, so a future escaping bug could not turn into anything
      that runs code or calls out to the network. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'none'; script-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';">
+<meta name="color-scheme" content="dark">
 <title>PhishAnalyzer report - {_esc(parsed.subject) or 'no subject'}</title>
 <style>
   :root {{
@@ -350,7 +355,9 @@ def render_html(report: Report) -> str:
     line-height: 1.5;
   }}
   .wrap {{ max-width: 900px; margin: 0 auto; }}
-  h1 {{ font-size: 1.4rem; font-weight: 600; margin: 0 0 1.25rem; letter-spacing: -0.01em; }}
+  .masthead {{ margin: 0 0 1.25rem; }}
+  h1 {{ font-size: 1.4rem; font-weight: 600; margin: 0; letter-spacing: -0.01em; }}
+  .masthead .subtitle {{ color: var(--text-muted); font-size: 0.82rem; margin-top: 0.25rem; }}
   h2 {{ font-size: 1.05rem; font-weight: 600; margin: 2rem 0 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }}
   h3 {{ font-size: 1rem; margin: 0.6rem 0 0.4rem; }}
   p {{ margin: 0.4rem 0; }}
@@ -446,7 +453,10 @@ def render_html(report: Report) -> str:
 </head>
 <body>
 <div class="wrap">
-  <h1>PhishAnalyzer Report</h1>
+  <div class="masthead">
+    <h1>PhishAnalyzer Report</h1>
+    <div class="subtitle">{source_name} &nbsp;|&nbsp; generated {generated_at}</div>
+  </div>
 
   <div class="verdict-banner">
     <div>
