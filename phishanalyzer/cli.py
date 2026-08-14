@@ -23,6 +23,19 @@ _EXIT_BY_LABEL = {
 _EMAIL_EXTENSIONS = {".eml", ".msg"}
 
 
+def _default_reports_dir() -> Path:
+    """The 'reports' folder next to the installed tool, not the caller's cwd.
+
+    A plain string default of "reports" would resolve relative to whatever
+    directory the command happens to be invoked from, scattering reports
+    across random folders depending on where the user's shell was sitting.
+    Anchoring to this file's own location means the report always lands in
+    the same place - <wherever this repo/install lives>/reports - regardless
+    of cwd, matching what analyze.bat/analyze.sh already do explicitly.
+    """
+    return Path(__file__).resolve().parent.parent / "reports"
+
+
 def analyze_file(path: Path, indicators: dict, use_ai: bool = True) -> Report:
     parsed = load_email(path)
     findings = analyzers.run_all(parsed, indicators)
@@ -71,8 +84,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--output-dir",
-        default="reports",
-        help="Directory to write the report(s) into (default: reports)",
+        default=None,
+        help="Directory to write the report(s) into (default: a 'reports' folder next to "
+        "the installed tool, regardless of the current working directory)",
     )
     parser.add_argument(
         "--no-html",
@@ -129,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     indicators = load_indicators(args.indicators)
-    out_dir = Path(args.output_dir)
+    out_dir = Path(args.output_dir) if args.output_dir else _default_reports_dir()
     formats = {"json", "html"} if args.format == "all" else {args.format}
     if not args.no_html:
         formats.add("html")
