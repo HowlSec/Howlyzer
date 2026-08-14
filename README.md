@@ -114,12 +114,15 @@ This is a heuristic tool for **triage**, not a verdict of record — it tells
 you where to spend your attention first, not a substitute for judgment on
 ambiguous cases.
 
-## Installation (Windows)
+## Installation
 
-**Requirements:** Python 3.10+ ([python.org/downloads](https://www.python.org/downloads/) —
-check "Add python.exe to PATH" during install).
+**Requirements:** Python 3.10+ ([python.org/downloads](https://www.python.org/downloads/)).
 
-1. Clone or download this repo.
+<details open>
+<summary><strong>Windows</strong></summary>
+
+1. Clone or download this repo. Check "Add python.exe to PATH" during the
+   Python install if you don't already have it.
 2. Open PowerShell in the folder and run:
    ```powershell
    .\setup.ps1
@@ -131,10 +134,26 @@ If PowerShell blocks the script from running (unsigned script policy), run:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\setup.ps1
 ```
+</details>
+
+<details>
+<summary><strong>macOS / Linux</strong></summary>
+
+1. Clone or download this repo. macOS ships Python, but if you need to
+   install/upgrade it: `brew install python3`. On Linux, use your distro's
+   package manager (e.g. `apt install python3 python3-venv`).
+2. Open a terminal in the folder and run:
+   ```bash
+   chmod +x setup.sh analyze.sh
+   ./setup.sh
+   ```
+   This creates a `.venv` virtual environment and installs everything needed
+   (`.msg`/Outlook support works the same as on Windows — it's pure Python).
+</details>
 
 ## Usage
 
-### Fastest: drag and drop
+### Windows: drag and drop
 
 Drag a `.eml` or `.msg` file straight onto **`analyze.bat`**. A console
 window opens with the verdict, and a JSON + HTML report is written to
@@ -142,7 +161,20 @@ window opens with the verdict, and a JSON + HTML report is written to
 to attach to a ticket or forward to a colleague (every URL/domain in it is
 already defanged, e.g. `hxxps://evil[.]tk`).
 
+### macOS / Linux: one command
+
+```bash
+./analyze.sh path/to/email.eml
+```
+Same behavior as `analyze.bat` — writes a JSON + HTML report to `reports/`
+next to the script. (Finder/most file managers don't support dropping a
+file onto a shell script the way Windows Explorer does onto a `.bat`, so
+this is the terminal equivalent.)
+
 ### Command line
+
+<details open>
+<summary><strong>Windows (PowerShell)</strong></summary>
 
 ```powershell
 # Single file, verdict printed to the console
@@ -164,6 +196,32 @@ Try it right now against the bundled samples:
 .\.venv\Scripts\python.exe -m phishanalyzer samples\sample_spam.eml
 .\.venv\Scripts\python.exe -m phishanalyzer samples\sample_legitimate.eml
 ```
+</details>
+
+<details>
+<summary><strong>macOS / Linux</strong></summary>
+
+```bash
+# Single file, verdict printed to the console
+./.venv/bin/python -m phishanalyzer path/to/reported_email.eml
+
+# A whole folder of reported emails at once
+./.venv/bin/python -m phishanalyzer ~/Downloads/reported
+
+# Also write JSON + HTML reports
+./.venv/bin/python -m phishanalyzer email.eml --format all --output-dir reports
+
+# Skip the optional AI summary even if you have a key set
+./.venv/bin/python -m phishanalyzer email.eml --no-ai
+```
+
+Try it right now against the bundled samples:
+```bash
+./.venv/bin/python -m phishanalyzer samples/sample_phish.eml
+./.venv/bin/python -m phishanalyzer samples/sample_spam.eml
+./.venv/bin/python -m phishanalyzer samples/sample_legitimate.eml
+```
+</details>
 
 **Exit codes** (useful for scripting/automation): `0` = legitimate or spam,
 `1` = suspicious, `2` = phishing or malicious.
@@ -236,6 +294,14 @@ Set it permanently for your user account:
 ```
 (Open a new PowerShell window afterward for it to take effect.)
 
+On macOS/Linux:
+```bash
+export ANTHROPIC_API_KEY="sk-ant-..."
+./.venv/bin/python -m phishanalyzer email.eml
+```
+Set it permanently by adding that `export` line to your shell profile
+(`~/.zshrc`, `~/.bashrc`, or equivalent), then open a new terminal.
+
 ## Customizing for your organization
 
 Edit `phishanalyzer\indicators.json` — it's the whole knowledge base, no code
@@ -253,6 +319,9 @@ changes needed:
 Point at a different file instead of editing the bundled one:
 ```powershell
 .\.venv\Scripts\python.exe -m phishanalyzer email.eml --indicators C:\path\to\my_indicators.json
+```
+```bash
+./.venv/bin/python -m phishanalyzer email.eml --indicators /path/to/my_indicators.json
 ```
 or set `PHISHANALYZER_INDICATORS` as an environment variable.
 
@@ -275,7 +344,9 @@ phishanalyzer/
 samples/                     # synthetic phishing / spam / legitimate examples used by tests
 tests/                        # includes test_no_unsafe_network_calls.py — the safety-guarantee test
 setup.ps1                      # Windows installer
-analyze.bat                     # drag-and-drop launcher
+analyze.bat                     # Windows drag-and-drop launcher
+setup.sh                         # macOS/Linux installer
+analyze.sh                        # macOS/Linux launcher
 ```
 
 ## Running the tests
@@ -283,6 +354,10 @@ analyze.bat                     # drag-and-drop launcher
 ```powershell
 .\.venv\Scripts\python.exe -m pip install pytest
 .\.venv\Scripts\python.exe -m pytest tests\ -v
+```
+```bash
+./.venv/bin/python -m pip install pytest
+./.venv/bin/python -m pytest tests/ -v
 ```
 
 ## Limitations
